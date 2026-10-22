@@ -1,0 +1,1 @@
+export const toIso = (s) => (s ? s.replace('','T') + 'Z':null);
