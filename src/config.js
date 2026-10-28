@@ -14,6 +14,7 @@ export const config = {
   devAuth: bool(process.env.DEV_AUTH),
   dbPath: path.resolve(ROOT, process.env.DB_PATH || 'data/vault.db'),
   uploadDir: path.resolve(ROOT, process.env.UPLOAD_DIR || 'uploads'),
+    maxUploadMb: num(process.env.MAX_UPLOAD_MB, 20),
 };
 
 // Safety: never allow the dev shortcut in production
