@@ -3,17 +3,18 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config.js';
 import './db.js';                                  // importing runs the schema code
-import { requireAuth } from './middleware/auth.js';
+import accountRoutes from './routes/account.js';
 import { errorHandler } from './middleware/errors.js';
 import authRoutes from './routes/auth.js';
-
+import { initAuth, requireAuth } from './middleware/auth.js';
+initAuth();
 const app = express();
 
 app.disable('x-powered-by');
 app.use(helmet());                    // safe default headers
 app.use(cors());                      // allow requests from other origins (web testing)
 app.use(express.json({ limit: '1mb' })); // read JSON request bodies
-
+app.use('/account',requireAuth,accountRoutes);
 // Public route (no login needed)
 app.get('/health', (req, res) => res.json({ ok: true }));
 
