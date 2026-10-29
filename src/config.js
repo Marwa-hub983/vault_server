@@ -12,9 +12,12 @@ export const config = {
   port: num(process.env.PORT, 3000),
   nodeEnv: process.env.NODE_ENV || 'development',
   devAuth: bool(process.env.DEV_AUTH),
+    firebaseServiceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH,
   dbPath: path.resolve(ROOT, process.env.DB_PATH || 'data/vault.db'),
   uploadDir: path.resolve(ROOT, process.env.UPLOAD_DIR || 'uploads'),
     maxUploadMb: num(process.env.MAX_UPLOAD_MB, 20),
+      chunkWords: num(process.env.CHUNK_WORDS, 180),
+  chunkOverlap: num(process.env.CHUNK_OVERLAP, 30),
 };
 
 // Safety: never allow the dev shortcut in production
