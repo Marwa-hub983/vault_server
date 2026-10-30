@@ -1,9 +1,11 @@
 # Dependencies
 node_modules/
 
-# Environment files
+# Environment files and secrets
 .env
 .env*.local
+firebase-service-account.json
+*-service-account*.json
 
 # Database and uploaded files
 data/
