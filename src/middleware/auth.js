@@ -9,24 +9,24 @@ import { initializeApp, cert } from 'firebase-admin/app';
 
 
 
-import { config } from '../config.js';
+import { config, ROOT } from '../config.js';
 import { db } from '../db.js';
 import { asyncHandler, HttpError } from './errors.js';
 
 
 export function initAuth() {
-  if(config.devAuth){
+  if (config.devAuth) {
     console.warn('DEV_AUTH is ON: requests with header "x-dev-user" skip Firebase. Local testing only.');
     return;
   }
-  if(!config.firebaseServiceAccountPath){
-    throw new Error('Set FIREBASE_SERVICE_ACCOUNT_PATH in.env (or DEV_AUTH=true fro local testing)');
+  if (!config.firebaseServiceAccountPath) {
+    throw new Error('Set FIREBASE_SERVICE_ACCOUNT_PATH in .env (or DEV_AUTH=true for local testing)');
   }
-  const file = path.resolve(ROOT,configDotenv.firebaseServiceAccountPath);
-  if(!fs.existsSync(file)){
+  const file = path.resolve(ROOT, config.firebaseServiceAccountPath);
+  if (!fs.existsSync(file)) {
     throw new Error(`Firebase service account file not found: ${file}`);
   }
-  initializeApp({credential: cert(JSON.parse(fs.readFileSync(file,'utf8')))});
+  initializeApp({ credential: cert(JSON.parse(fs.readFileSync(file, 'utf8'))) });
 }
 
 // Runs before protected routes. On success it sets req.user = { uid, email }.
@@ -37,11 +37,9 @@ export const requireAuth = asyncHandler(async (req, res, next) => {
 
   if (config.devAuth && devUser) {
     // Local testing shortcut: header  x-dev-user: marwa
-     uid = 'dev-' + devUser.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
-     email = `${uid}@dev.local`;
-
- 
-  }else {
+    uid = 'dev-' + devUser.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
+    email = `${uid}@dev.local`;
+  } else {
     // Real login: the app sends   Authorization: Bearer <Firebase ID token>
     const match = (req.header('authorization') || '').match(/^Bearer (.+)$/i);
     if (!match) throw new HttpError(401, 'Missing bearer token', 'unauthorized');
@@ -52,13 +50,11 @@ export const requireAuth = asyncHandler(async (req, res, next) => {
     } catch {
       throw new HttpError(401, 'Invalid or expired token', 'unauthorized');
     }
+  }
 
-
-
-}
-db.prepare('INSERT OR IGNORE INTO users (id,email) VALUES(?, ?').run(uid,email);
-req.user={uid,email};
-next();
+  db.prepare('INSERT OR IGNORE INTO users (id, email) VALUES (?, ?)').run(uid, email);
+  req.user = { uid, email };
+  next();
 });
 export async function deleteFirebaseUser(uid) {
   if(config.devAuth) return;

@@ -5,8 +5,8 @@ import { config } from '../config.js';
 import{ db } from '../db.js';
 import { asyncHandler } from '../middleware/errors.js';
 import { deleteFirebaseUser } from '../middleware/auth.js';
-import { config } from 'dotenv';
- const router =Router();
+
+const router = Router();
 
  router.delete('/', asyncHandler(async(req,res)=>{
     const uid = req.user.uid;
