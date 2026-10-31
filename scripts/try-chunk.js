@@ -1,6 +1,6 @@
 import path from 'node:path';
-import { extractPages } from   '../services/extract.js';
-import { chunkPages } from    '../services/chunk.js';
+import { extractPages } from   '../src/services/extract.js';
+import { chunkPages } from    '../src/services/chunk.js';
 
 const file =process.argv[2];
 if(!file){
