@@ -18,6 +18,7 @@ export const config = {
     maxUploadMb: num(process.env.MAX_UPLOAD_MB, 20),
       chunkWords: num(process.env.CHUNK_WORDS, 180),
   chunkOverlap: num(process.env.CHUNK_OVERLAP, 30),
+  embeddingProvider:process.env.EMBEDDING_PROVIDER || 'local'
 };
 
 // Safety: never allow the dev shortcut in production

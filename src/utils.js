@@ -10,3 +10,7 @@ export function resolveUpload(relpath){
     if(!abs.startsWith(config , uploadDir + path.sep )) throw new Error('Invalid file path');
     return abs;
 }
+export const f32ToBuffer = (arr) => Buffer.from(new Float32Array(arr).buffer);
+export function bufferTo32(buf){
+    return new Float32Array(buf.buffer.slice(buf.byteOffset,buf.byteOffset + buf.byteLength));
+}
