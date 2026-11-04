@@ -14,7 +14,7 @@ let running = false;
 
 export function enqueue(docId){
     queue.push(docId);
-    void running();
+    void run();
 }
 
 async function run(){

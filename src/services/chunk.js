@@ -1,4 +1,3 @@
-import { text } from 'express';
 import { config } from '../config.js';
 
 export function chunkPages(pages,size = config.chunkWords,overlap= config.chunkOverlap){
@@ -15,9 +14,9 @@ export function chunkPages(pages,size = config.chunkWords,overlap= config.chunkO
     for (let start= 0; start < words.length; start += step){
         const slice =words.slice(start,start + size);
         chunks.push({
-            index:chunkPages.length,
-            page:slice[0].page,
-            text:slice.map((x)=> x.w).join(' ')
+            index: chunks.length,
+            page: slice[0].page,
+            text: slice.map((x) => x.w).join(' ')
         });
         if(start + size >= words.length) break;
     }

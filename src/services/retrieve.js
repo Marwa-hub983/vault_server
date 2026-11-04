@@ -1,6 +1,7 @@
 import { db } from '../db.js';
 import { bufferToF32 } from '../utils.js';
 
+
 function dot(a, b) {
     let sum = 0;
     for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
@@ -11,9 +12,9 @@ export function retrieve(userId, queryVec, scope, k, minScore) {
     FROM chunks c JOIN documents d ON d.id = c.document_id
     WHERE d.user_id = ? AND d.status ='ready'`;
     const params = [userId];
-    if (scope.type === 'document') { sql += 'AND d.id =?'; params.push(Number(scope.value)); }
+    if (scope.type === 'document') { sql += ' AND d.id = ?'; params.push(Number(scope.value)); }
     if (scope.type === 'folder') {
-        sql += 'AND d.folder =?';
+        sql += ' AND d.folder = ?';
         params.push(String(scope.value));
     }
     const rows = db.prepare(sql).all(...params);

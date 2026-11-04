@@ -12,7 +12,7 @@ async function getExtractor() {
         if (!extractorPromise) {
                 extractorPromise = import('@huggingface/transformers').then(({ pipeline, env }) => {
                         env.cacheDir = path.join(ROOT, 'data', 'models');
-                        return pipeline('feature-extraction', 'Xenova/all-MinLiM-L6-v2');
+                        return pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
                 });
                 extractorPromise.catch(() => { extractorPromise = undefined })
                         ;
@@ -33,7 +33,7 @@ export async function embedTexts(texts){
         if(config.embeddingProvider === 'fake') return texts.map(fakeEmbed);
         const extractor=await getExtractor();
         const out =[];
-        for(let i =0; i < texts.length; i+16){
+        for(let i = 0; i < texts.length; i += 16){
                 const batch =texts.slice(i,i+ 16);
                 const tensor=await extractor(batch,{pooling:'mean',normalize:true});
                 out.push(...tensor.tolist());
