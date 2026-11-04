@@ -7,6 +7,10 @@ import accountRoutes from './routes/account.js';
 import { errorHandler } from './middleware/errors.js';
 import authRoutes from './routes/auth.js';
 import { initAuth, requireAuth } from './middleware/auth.js';
+import { requeueStale } from './services/ingest.js';
+import { warmUp } from './services/embed.js';
+
+
 initAuth();
 const app = express();
 
@@ -29,6 +33,8 @@ app.use((req, res) => res.status(404).json({ error: 'not_found', message: 'Route
 
 // Always last
 app.use(errorHandler);
+requeueStale();
+warmUp();
 
 app.listen(config.port, '0.0.0.0', () => {
   console.log(`Vault server running on http://localhost:${config.port}`);

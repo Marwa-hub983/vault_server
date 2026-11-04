@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { config, ROOT } from '../config.js';
 import { db } from '../db.js';
 import { asyncHandler, HttpError } from '../middleware/errors.js';
+import { enqueue } from '../services/ingest.js';
 import { resolveUpload, toIso } from '../utils.js';
 
 const router = Router();
@@ -110,7 +111,7 @@ router.post('/', upload.single('file'), asyncHandler(async (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, ?)`)
     .run(req.user.uid, title, original, rel, req.file.mimetype, req.file.size, body.folder || null);
 
-  // Step 5 will add here:  enqueue(info.lastInsertRowid);
+  enqueue(info.lastInsertRowid); // process in the background: extract -> chunk -> embed
   res.status(201).json(toDoc(getOwned(info.lastInsertRowid, req.user.uid)));
 }));
 
@@ -123,6 +124,28 @@ router.get('/:id', asyncHandler(async (req, res) => {
 router.get('/:id/status', asyncHandler(async (req, res) => {
   const d = getOwned(idParam(req), req.user.uid);
   res.json({ id: d.id, status: d.status, error: d.error });
+}));
+
+// GET /documents/:id/chunks?limit=&offset=   (Chunks tab in the app)
+router.get('/:id/chunks', asyncHandler(async (req, res) => {
+  const d = getOwned(idParam(req), req.user.uid);
+  const q = z.object({
+    limit: z.coerce.number().int().min(1).max(100).default(50),
+    offset: z.coerce.number().int().min(0).default(0),
+  }).parse(req.query);
+
+  const items = db.prepare(
+    'SELECT id, chunk_index AS chunkIndex, page, text FROM chunks WHERE document_id = ? ORDER BY chunk_index LIMIT ? OFFSET ?'
+  ).all(d.id, q.limit, q.offset);
+  res.json({ items, limit: q.limit, offset: q.offset });
+}));
+
+// POST /documents/:id/reindex   (process the file again, e.g. after a failure)
+router.post('/:id/reindex', asyncHandler(async (req, res) => {
+  const d = getOwned(idParam(req), req.user.uid);
+  db.prepare("UPDATE documents SET status = 'uploaded', error = NULL, updated_at = datetime('now') WHERE id = ?").run(d.id);
+  enqueue(d.id);
+  res.status(202).json({ id: d.id, status: 'uploaded' });
 }));
 
 // DELETE /documents/:id
