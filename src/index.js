@@ -4,12 +4,15 @@ import helmet from 'helmet';
 import { config } from './config.js';
 import './db.js';                                  // importing runs the schema code
 import accountRoutes from './routes/account.js';
-import { errorHandler } from './middleware/errors.js';
 import authRoutes from './routes/auth.js';
+import documentRoutes from './routes/document.js';
+import chunkRoutes from './routes/chunks.js';
+import askRoutes from './routes/ask.js';
+import conversationRoutes from './routes/conversations.js';
+import { errorHandler } from './middleware/errors.js';
 import { initAuth, requireAuth } from './middleware/auth.js';
 import { requeueStale } from './services/ingest.js';
 import { warmUp } from './services/embed.js';
-
 
 initAuth();
 const app = express();
@@ -18,15 +21,17 @@ app.disable('x-powered-by');
 app.use(helmet());                    // safe default headers
 app.use(cors());                      // allow requests from other origins (web testing)
 app.use(express.json({ limit: '1mb' })); // read JSON request bodies
-app.use('/account',requireAuth,accountRoutes);
+
 // Public route (no login needed)
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 // Protected routes
 app.use('/auth', requireAuth, authRoutes);
-
-// Placeholder: replaced by the real documents router in Step 3
-app.get('/documents', requireAuth, (req, res) => res.json({ items: [] }));
+app.use('/account', requireAuth, accountRoutes);
+app.use('/documents', requireAuth, documentRoutes);
+app.use('/chunks', requireAuth, chunkRoutes);
+app.use('/ask', requireAuth, askRoutes);
+app.use('/conversations', requireAuth, conversationRoutes);
 
 // Unknown route
 app.use((req, res) => res.status(404).json({ error: 'not_found', message: 'Route not found' }));
